@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { assertType, describe, expect, expectTypeOf, it } from "vitest";
 import { Equal, Expect } from "./helpers/type-utils";
 
@@ -379,21 +381,23 @@ describe("Problema de filtratge amb typeof", () => {
 // Pista: hi ha diverses maneres de resoldre aquest repte, prova diferents opcions!
 // */
 
-// describe("Problema de blocs catch", () => {
-//   const tryCatchDemo = (state: "fail" | "succeed") => {
-//     try {
-//       if (state === "fail") {
-//         throw new Error("Failure!");
-//       }
-//     } catch (e) {
-//       return e.message;
-//     }
-//   };
+describe("Problema de blocs catch", () => {
+  const tryCatchDemo = (state: "fail" | "succeed") => {
+    try {
+      if (state === "fail") {
+        throw new Error("Failure!");
+      }
+    } catch (e) {
+      if (e instanceof Error) { // Hacer una verificación de tipo (narrowing); entonces funciona.
+        return e.message;
+      }
+    }
+  };
 
-//   it("Ha de retornar el missatge quan falla", () => {
-//     expect(tryCatchDemo("fail")).toEqual("Failure!");
-//   });
-// });
+  it("Ha de retornar el missatge quan falla", () => {
+    expect(tryCatchDemo("fail")).toEqual("Failure!");
+  });
+});
 
 // /*
 // Repte 14:
@@ -402,68 +406,69 @@ describe("Problema de filtratge amb typeof", () => {
 //  fer-ho més DRY?
 // */
 
-// describe("Problema d'herència amb extends", () => {
-//   interface User {
-//     id: string;
-//     firstName: string;
-//     lastName: string;
-//   }
+describe("Problema d'herència amb extends", () => {
+  interface Base {
+    id: string;
+  }
+  
+  interface User extends Base {
+    firstName: string;
+    lastName: string;
+  }
 
-//   interface Post {
-//     id: string;
-//     title: string;
-//     body: string;
-//   }
+  interface Post extends Base {
+    title: string;
+    body: string;
+  }
 
-//   interface Comment {
-//     id: string;
-//     comment: string;
-//   }
+  interface Comment extends Base {
+    comment: string;
+  }
 
-//   type tests = [
-//     Expect<Equal<User, { id: string; firstName: string; lastName: string }>>,
-//     Expect<Equal<Post, { id: string; title: string; body: string }>>,
-//     Expect<Equal<Comment, { id: string; comment: string }>>
-//   ];
-// });
+  type tests = [
+    Expect<Equal<User, { id: string; firstName: string; lastName: string }>>,
+    Expect<Equal<Post, { id: string; title: string; body: string }>>,
+    Expect<Equal<Comment, { id: string; comment: string }>>
+  ];
+});
 
 // /*
 // Repte 15:
 // Actualitza el tipus de retorn de la funció perquè sigui 'User i { posts: Post[] }'.
 // */
 
-// describe("Problema d'intersecció de tipus", () => {
-//   interface User {
-//     id: string;
-//     firstName: string;
-//     lastName: string;
-//   }
+describe("Problema d'intersecció de tipus", () => {
+  interface User {
+    id: string;
+    firstName: string;
+    lastName: string;
+  }
 
-//   interface Post {
-//     id: string;
-//     title: string;
-//     body: string;
-//   }
+  interface Post {
+    id: string;
+    title: string;
+    body: string;
+  }
 
-//   const getDefaultUserAndPosts = (): unknown => {
-//     return {
-//       id: "1",
-//       firstName: "Jen",
-//       lastName: "Simmons",
-//       posts: [
-//         {
-//           id: "1",
-//           title: "Com vaig aprendre a tocar la guitarra",
-//           body: "Va ser un acord perfecte des del principi",
-//         },
-//       ],
-//     };
-//   };
+  const getDefaultUserAndPosts = (): User & {posts: Post[]} => {
+    return {
+      id: "1",
+      firstName: "Jen",
+      lastName: "Simmons",
+      posts: [
+        {
+          id: "1",
+          title: "Com vaig aprendre a tocar la guitarra",
+          body: "Va ser un acord perfecte des del principi",
+        },
+      ],
+    };
+  };
 
-//   const userAndPosts = getDefaultUserAndPosts();
+  const userAndPosts = getDefaultUserAndPosts();
 
-//   console.log(userAndPosts.posts[0]);
-// });
+  console.log(userAndPosts.posts[0]);
+});
 
 // /*
 // Repte 16:
@@ -471,46 +476,46 @@ describe("Problema de filtratge amb typeof", () => {
 // Llegeix la documentació de TypeScript sobre Utility Types per veure què pots trobar.
 // */
 
-// describe("Problema d'Omit i Pick", () => {
-//   interface User {
-//     id: string;
-//     firstName: string;
-//     lastName: string;
-//   }
+describe("Problema d'Omit i Pick", () => {
+  interface User {
+    id: string;
+    firstName: string;
+    lastName: string;
+  }
 
-//   /**
-//    * Com creem un nou tipus d'objecte amb NOMÉS les propietats
-//    * firstName i lastName de User?
-//    */
+  /**
+   * Com creem un nou tipus d'objecte amb NOMÉS les propietats
+   * firstName i lastName de User?
+   */
 
-//   type MyType = unknown;
+  type MyType = Pick<User, "firstName" | "lastName">;
 
-//   type tests = [Expect<Equal<MyType, { firstName: string; lastName: string }>>];
-// });
+  type tests = [Expect<Equal<MyType, { firstName: string; lastName: string }>>];
+});
 
 // /*
 // Repte 17:
 // La funció 'onFocusChange' is actualment 'unknown'. Visita la documentació de TypeScript i esbrina el tipus apropiat per la funció.
 // */
 
-// describe("Problema de tipus de funció", () => {
+describe("Problema de tipus de funció", () => {
 
-//   const addListener = (onFocusChange: unknown) => {
-//     window.addEventListener("focus", () => {
-//       onFocusChange(true);
-//     });
+  const addListener = (onFocusChange: (isFocused: boolean) => void) => {
+    window.addEventListener("focus", () => {
+      onFocusChange(true);
+    });
 
-//     window.addEventListener("blur", () => {
-//       onFocusChange(false);
-//     });
-//   };
+    window.addEventListener("blur", () => {
+      onFocusChange(false);
+    });
+  };
 
-//   addListener((isFocused) => {
-//     console.log({ isFocused });
+  addListener((isFocused) => {
+    console.log({ isFocused });
 
-//     type tests = [Expect<Equal<typeof isFocused, boolean>>];
-//   });
-// });
+    type tests = [Expect<Equal<typeof isFocused, boolean>>];
+  });
+});
 
 // /*
 // Repte 18:
@@ -518,49 +523,55 @@ describe("Problema de filtratge amb typeof", () => {
 // Consulta la sintaxi de tipatge de funcions i Promise que hem vist anteriorment per ajudar-te.
 // */
 
-// describe("Problema de tipus de funció amb promeses", () => {
+describe("Problema de tipus de funció amb promeses", () => {
 
-//     interface User {
-//         id: string;
-//         firstName: string;
-//         lastName: string;
-//       }
+    interface User {
+        id: string;
+        firstName: string;
+        lastName: string;
+      }
       
-//       const createThenGetUser = async (
-//         createUser: unknown,
-//         getUser: unknown,
-//       ): Promise<User> => {
-//         const userId: string = await createUser();
-      
-//         const user = await getUser(userId);
-      
-//         return user;
-//       };
+      const createThenGetUser = async (
+        createUser: () => Promise<string>, // Devuelve un ID (string)
+        getUser: (id: string) => Promise<User>, // Recibe ID y devuelve Usuario
+      ): Promise<User> => {
+        const userId: string = await createUser();
+        const user = await getUser(userId);
+        return user;
+      };
       
 
-//   it("Ha de crear l'usuari i després obtenir-lo", async () => {
-//     const user = await createThenGetUser(
-//       async () => "123",
-//       async (id) => ({
-//         id,
-//         firstName: "Jen",
-//         lastName: "Simmons",
-//       })
-//     );
+  it("Ha de crear l'usuari i després obtenir-lo", async () => {
+    const user = await createThenGetUser(
+      async () => "123",
+      async (id) => ({
+        id,
+        firstName: "Jen",
+        lastName: "Simmons",
+      })
+    );
 
-//     expect(user).toEqual({
-//       id: "123",
-//       firstName: "Jen",
-//       lastName: "Simmons",
-//     });
-//   });
-// });
+    expect(user).toEqual({
+      id: "123",
+      firstName: "Jen",
+      lastName: "Simmons",
+    });
+  });
+});
 
 // /*
 // Repte:
 // Llegeix la documentació de TypeScript sobre Utility Types i esbrina com utilitzar ReturnType per extreure el tipus de retorn de myFunc.
 // Actualitza el codi perquè el següent test passi:
-// type tests = [Expect<Equal<MyFuncReturn, string>>];
+
+const myFunc = () => {
+  return "hola mundo";
+};
+
+type MyFuncReturn = ReturnType<typeof myFunc>;
+
+type tests = [Expect<Equal<MyFuncReturn, string>>];
+
 // Pista: pots utilitzar typeof per obtenir el tipus d'una variable o funció.
 // */
 
